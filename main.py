@@ -1,5 +1,7 @@
 import yaml
 import os
+from typing import Dict, Optional
+from pydantic import BaseModel, Field
 from agents.product_specialist import create_product_agent, create_product_task
 from crewai import Crew
 from dotenv import load_dotenv
@@ -9,27 +11,52 @@ from langchain_openai import ChatOpenAI
 
 load_dotenv()
 
-def load_config():
-    with open("config/store_config.yaml", "r") as file:
-        return yaml.safe_load(file)
+# --- Config Schema (Pydantic) ---
 
-def get_llm_for_agent(config, agent_key):
+class StoreConfig(BaseModel):
+    name: str
+    url: str
+    niche: str
+
+class ModelInfo(BaseModel):
+    provider: str
+    name: str
+    temperature: float = 0.5
+
+class AgentConfig(BaseModel):
+    model_key: str
+    verbose: bool = True
+    allow_delegation: bool = False
+
+class NacelleConfig(BaseModel):
+    store: StoreConfig
+    models: Dict[str, ModelInfo]
+    agents: Dict[str, AgentConfig]
+
+# --- End Schema ---
+
+def load_config() -> NacelleConfig:
+    with open("config/store_config.yaml", "r") as file:
+        raw_config = yaml.safe_load(file)
+        return NacelleConfig(**raw_config)
+
+def get_llm_for_agent(config: NacelleConfig, agent_key: str):
     """
     Retrieves the correct LLM instance based on the agent's configuration.
     """
-    agent_config = config['agents'].get(agent_key)
+    agent_config = config.agents.get(agent_key)
     if not agent_config:
         return None
         
-    model_key = agent_config.get('model_key')
-    model_info = config['models'].get(model_key)
+    model_key = agent_config.model_key
+    model_info = config.models.get(model_key)
     
     if not model_info:
         return None
         
-    provider = model_info['provider']
-    name = model_info['name']
-    temp = model_info.get('temperature', 0.5)
+    provider = model_info.provider
+    name = model_info.name
+    temp = model_info.temperature
     
     if provider == "groq":
         return ChatGroq(model=name, temperature=temp)
@@ -41,10 +68,15 @@ def get_llm_for_agent(config, agent_key):
     return None
 
 def run_nacelle_board():
-    # 1. Load the "Flight Plan" from YAML
-    config = load_config()
-    store_url = config['store']['url']
-    store_name = config['store']['name']
+    # 1. Load the "Flight Plan" from YAML (Now Validated by Pydantic)
+    try:
+        config = load_config()
+    except Exception as e:
+        print(f"ERROR: Invalid configuration in store_config.yaml:\n{e}")
+        return
+
+    store_url = config.store.url
+    store_name = config.store.name
     
     print(f"### NACELLE BOARD: INITIALIZING ENGINES FOR {store_name.upper()} ###")
 
@@ -61,7 +93,7 @@ def run_nacelle_board():
     nacelle_crew = Crew(
         agents=[merchandiser],
         tasks=[analysis_task],
-        verbose=config['agents']['product_specialist']['verbose']
+        verbose=config.agents['product_specialist'].verbose
     )
 
     result = nacelle_crew.kickoff()
