@@ -10,8 +10,8 @@ The "Source of Truth" for the entire system.
 - **Model Registry:** A list of available LLM providers and their hyperparameters.
 - **Agent Mapping:** A dictionary that assigns specific models to specific agent roles.
 
-### 2. Validation Engine (Pydantic)
-Located in `main.py`, this layer ensures that the YAML configuration is perfectly formatted before the engines start. This prevents mid-run crashes and provides clear developer feedback.
+### 2. Validation Engine (`config/schemas.py`)
+Driven by **Pydantic**, this layer defines the strict data models for the store and its models. It ensures that the YAML configuration is perfectly formatted before the engines start, preventing mid-run crashes and providing clear developer feedback.
 
 ### 3. The Model Factory
 A centralized dispatch system that translates YAML model keys (e.g., `fast`, `creative`) into live, authenticated LangChain objects (`ChatGroq`, `ChatOpenAI`, etc.).
@@ -24,7 +24,7 @@ Independent modules defined using the **CrewAI** framework. Each agent:
 
 ## 🔄 Execution Flow
 
-1.  **Bootstrapping:** `main.py` loads `.env` secrets and validates `store_config.yaml` using Pydantic.
+1.  **Bootstrapping:** `main.py` loads `.env` secrets and validates `store_config.yaml` using the Pydantic models defined in `config/schemas.py`.
 2.  **Model Instantiation:** The Model Factory creates the necessary LLM instances for the assigned agents.
 3.  **Agent Assembly:** Agents are initialized with their injected LLMs and Tools.
 4.  **Task Definition:** Objectives are linked to specific agents.

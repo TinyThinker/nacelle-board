@@ -9,9 +9,16 @@ nacelle-board/
 ├── agents/            # AI Agent definitions (CrewAI)
 ├── tools/             # Custom tools for agents (Shopify JSON, Web Crawlers)
 ├── config/            # Store-specific configurations
+│   ├── schemas.py     # Pydantic data models for validation
+│   └── store_config.yaml
 ├── main.py            # Entry point to launch the crew
 └── .env               # Secret keys (ignored by git)
 ```
+
+## ✨ Features
+- **Multi-Model Registry:** Mix and match OpenAI, Groq, and Gemini agents in a single run.
+- **Strict Validation:** Pydantic-powered configuration ensures the engine never boots with a broken flight plan.
+- **Modular Design:** Agents are decoupled from their LLM brains for maximum flexibility.
 
 ## 🚀 Getting Started
 
