@@ -29,13 +29,14 @@ def get_llm_for_agent(config, agent_key):
         
     provider = model_info['provider']
     name = model_info['name']
+    temp = model_info.get('temperature', 0.5)
     
     if provider == "groq":
-        return ChatGroq(model=name)
+        return ChatGroq(model=name, temperature=temp)
     elif provider == "gemini":
-        return ChatGoogleGenerativeAI(model=name)
+        return ChatGoogleGenerativeAI(model=name, temperature=temp)
     elif provider == "openai":
-        return ChatOpenAI(model=name)
+        return ChatOpenAI(model=name, temperature=temp)
     
     return None
 
