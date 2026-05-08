@@ -1,0 +1,8 @@
+store:
+  name: "Doostpets"
+  url: "https://doostpets.com"
+  niche: "Pet Boutique"
+
+agents:
+  verbose: true
+  allow_delegation: false
