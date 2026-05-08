@@ -1,8 +1,31 @@
 store:
-  name: "Doostpets"
-  url: "https://doostpets.com"
-  niche: "Pet Boutique"
+  name: "Your Store Name"
+  url: "https://yourstore.com"
+  niche: "Your Niche"
 
+# Define your available LLMs here
+models:
+  fast:
+    provider: "groq"
+    name: "llama3-70b-8192"
+  smart:
+    provider: "openai"
+    name: "gpt-4-turbo"
+  creative:
+    provider: "gemini"
+    name: "gemini-1.5-pro"
+
+# Assign models to specific agent roles
 agents:
-  verbose: true
-  allow_delegation: false
+  product_specialist:
+    model_key: "fast"
+    verbose: true
+    allow_delegation: false
+  growth_strategist:
+    model_key: "smart"
+    verbose: true
+    allow_delegation: true
+  brand_scout:
+    model_key: "creative"
+    verbose: true
+    allow_delegation: false

@@ -1,7 +1,7 @@
 from crewai import Agent, Task
 from crewai_tools import WebsiteSearchTool
 
-def create_product_agent(store_url):
+def create_product_agent(store_url, llm):
     # Constructing the structured data endpoint
     json_endpoint = f"{store_url.rstrip('/')}/collections/all/products.json"
     
@@ -15,6 +15,7 @@ def create_product_agent(store_url):
         analyzing boutique inventories to find the 'hidden gems' and identifying 
         where a store is missing out on higher margins.""",
         tools=[product_tool],
+        llm=llm,
         verbose=True
     )
 

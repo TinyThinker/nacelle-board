@@ -3,12 +3,41 @@ import os
 from agents.product_specialist import create_product_agent, create_product_task
 from crewai import Crew
 from dotenv import load_dotenv
+from langchain_groq import ChatGroq
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_openai import ChatOpenAI
 
 load_dotenv()
 
 def load_config():
     with open("config/store_config.yaml", "r") as file:
         return yaml.safe_load(file)
+
+def get_llm_for_agent(config, agent_key):
+    """
+    Retrieves the correct LLM instance based on the agent's configuration.
+    """
+    agent_config = config['agents'].get(agent_key)
+    if not agent_config:
+        return None
+        
+    model_key = agent_config.get('model_key')
+    model_info = config['models'].get(model_key)
+    
+    if not model_info:
+        return None
+        
+    provider = model_info['provider']
+    name = model_info['name']
+    
+    if provider == "groq":
+        return ChatGroq(model=name)
+    elif provider == "gemini":
+        return ChatGoogleGenerativeAI(model=name)
+    elif provider == "openai":
+        return ChatOpenAI(model=name)
+    
+    return None
 
 def run_nacelle_board():
     # 1. Load the "Flight Plan" from YAML
@@ -18,17 +47,20 @@ def run_nacelle_board():
     
     print(f"### NACELLE BOARD: INITIALIZING ENGINES FOR {store_name.upper()} ###")
 
-    # 2. Initialize the Product Agent using config data
-    merchandiser = create_product_agent(store_url)
+    # 2. Get the specific LLM for the Product Specialist
+    product_llm = get_llm_for_agent(config, 'product_specialist')
 
-    # 3. Define the Mission
+    # 3. Initialize the Product Agent using config data and assigned LLM
+    merchandiser = create_product_agent(store_url, product_llm)
+
+    # 4. Define the Mission
     analysis_task = create_product_task(merchandiser)
 
-    # 4. Fire up the Crew
+    # 5. Fire up the Crew
     nacelle_crew = Crew(
         agents=[merchandiser],
         tasks=[analysis_task],
-        verbose=config['agents']['verbose']
+        verbose=config['agents']['product_specialist']['verbose']
     )
 
     result = nacelle_crew.kickoff()

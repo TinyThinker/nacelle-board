@@ -2,3 +2,5 @@ crewai
 pyyaml
 crewai-tools
 python-dotenv
+langchain-groq
+langchain-google-genai
