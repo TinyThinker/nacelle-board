@@ -1,7 +1,6 @@
 import yaml
 import os
-from typing import Dict, Optional
-from pydantic import BaseModel, Field
+from config.schemas import NacelleConfig
 from agents.product_specialist import create_product_agent, create_product_task
 from crewai import Crew
 from dotenv import load_dotenv
@@ -10,30 +9,6 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_openai import ChatOpenAI
 
 load_dotenv()
-
-# --- Config Schema (Pydantic) ---
-
-class StoreConfig(BaseModel):
-    name: str
-    url: str
-    niche: str
-
-class ModelInfo(BaseModel):
-    provider: str
-    name: str
-    temperature: float = 0.5
-
-class AgentConfig(BaseModel):
-    model_key: str
-    verbose: bool = True
-    allow_delegation: bool = False
-
-class NacelleConfig(BaseModel):
-    store: StoreConfig
-    models: Dict[str, ModelInfo]
-    agents: Dict[str, AgentConfig]
-
-# --- End Schema ---
 
 def load_config() -> NacelleConfig:
     with open("config/store_config.yaml", "r") as file:
