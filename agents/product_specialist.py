@@ -1,12 +1,13 @@
+import os
 from crewai import Agent, Task
-from crewai_tools import WebsiteSearchTool
+from crewai_tools import ScrapeWebsiteTool
 
 def create_product_agent(store_url, llm):
     # Constructing the structured data endpoint
     json_endpoint = f"{store_url.rstrip('/')}/collections/all/products.json"
     
-    # Tool for the agent to 'read' the inventory
-    product_tool = WebsiteSearchTool(website_url=json_endpoint)
+    # Use ScrapeWebsiteTool instead of WebsiteSearchTool to avoid RAG/embedding overhead and OpenAI dependencies
+    product_tool = ScrapeWebsiteTool(website_url=json_endpoint)
 
     return Agent(
         role='Inventory & Merchandising Director',

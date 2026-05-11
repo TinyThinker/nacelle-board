@@ -9,6 +9,9 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_openai import ChatOpenAI
 
 load_dotenv()
+# Set dummy key to satisfy CrewAI tool validation for users without OpenAI
+if not os.environ.get("OPENAI_API_KEY"):
+    os.environ["OPENAI_API_KEY"] = "dummy"
 
 def load_config() -> NacelleConfig:
     with open("config/store_config.yaml", "r") as file:
@@ -36,7 +39,13 @@ def get_llm_for_agent(config: NacelleConfig, agent_key: str):
     if provider == "groq":
         return ChatGroq(model=name, temperature=temp)
     elif provider == "gemini":
-        return ChatGoogleGenerativeAI(model=name, temperature=temp)
+        # Ensure GEMINI_API_KEY is set for LiteLLM (which CrewAI uses for strings)
+        if "GOOGLE_API_KEY" in os.environ:
+            os.environ["GEMINI_API_KEY"] = os.environ["GOOGLE_API_KEY"]
+        
+        # Return as string for CrewAI to handle via LiteLLM
+        # Mapping gemini-3.1-flash-lite to the litellm format
+        return f"gemini/{name}"
     elif provider == "openai":
         return ChatOpenAI(model=name, temperature=temp)
     
